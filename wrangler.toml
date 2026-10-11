@@ -1,0 +1,11 @@
+name = "the-last-letter-api"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+[ai]
+binding = "AI"
+
+[[kv_namespaces]]
+binding = "ROOMS"
+id = "GANTI_DENGAN_KV_NAMESPACE_ID"
+preview_id = "GANTI_DENGAN_KV_PREVIEW_NAMESPACE_ID"
