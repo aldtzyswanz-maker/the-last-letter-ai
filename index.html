@@ -17,7 +17,8 @@
 </section>
 </main>
 <script>
-const API_BASE = ''; // Jika frontend dan Worker terpisah, isi URL Worker di sini, mis. https://the-last-letter-api.username.workers.dev
+
+const API_BASE = 'https://the-last-letter-ai.aldiriyadismg04.workers.dev';
 const $ = id => document.getElementById(id);
 let roomCode='', playerId=localStorage.getItem('tl_player')||crypto.randomUUID(), pollTimer=null, lastState='', busy=false;
 localStorage.setItem('tl_player',playerId);
