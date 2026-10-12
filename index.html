@@ -199,9 +199,22 @@ const API_BASE = "https://the-last-letter-ai.aldiriyadismg04.workers.dev";
 const $ = id => document.getElementById(id);
 
 const state = {
-  category: "random", roomCode: "", playerId: "", playerName: "",
-  room: null, poll: null, busy: false, activeSuspect: null, thinking: false
+  category: "random",
+  roomCode: "",
+  playerId: "",
+  playerName: "",
+  room: null,
+  poll: null,
+  busy: false,
+  activeSuspect: null,
+  thinking: false
 };
+
+// Cache tanda tangan dan elemen chat untuk menghindari redraw berulang.
+let lastChatSignature = "";
+let renderedChatNodes = new Map();
+let typingNode = null;
+let introNode = null;
 
 const categoryNames = {
   random:"Kasus acak", murder:"Pembunuhan", robbery:"Perampokan",
@@ -220,6 +233,7 @@ function toast(message) {
 async function api(path, data, timeout = 45000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
+
   try {
     const response = await fetch(API_BASE + path, {
       method: data ? "POST" : "GET",
@@ -227,8 +241,13 @@ async function api(path, data, timeout = 45000) {
       body: data ? JSON.stringify(data) : undefined,
       signal: controller.signal
     });
+
     const result = await response.json().catch(() => ({}));
-    if (!response.ok || result.error) throw new Error(result.error || "Permintaan gagal.");
+
+    if (!response.ok || result.error) {
+      throw new Error(result.error || "Permintaan gagal.");
+    }
+
     return result;
   } catch (error) {
     if (error.name === "AbortError") {
@@ -262,6 +281,14 @@ function stopPolling() {
   state.poll = null;
 }
 
+function resetChatCache() {
+  lastChatSignature = "";
+  renderedChatNodes = new Map();
+  typingNode = null;
+  introNode = null;
+  $("chatLog").replaceChildren();
+}
+
 function resetRoom() {
   stopPolling();
   state.roomCode = "";
@@ -269,6 +296,7 @@ function resetRoom() {
   state.room = null;
   state.activeSuspect = null;
   state.thinking = false;
+  resetChatCache();
 }
 
 function selectCategory(type) {
@@ -277,24 +305,35 @@ function selectCategory(type) {
     button.classList.toggle("active", button.dataset.type === type)
   );
 }
+
 document.querySelectorAll(".category").forEach(button =>
   button.addEventListener("click", () => selectCategory(button.dataset.type))
 );
 
 async function createRoom() {
   if (state.busy) return;
+
   const name = $("playerName").value.trim();
   if (!name) return toast("Masukkan nama detektif terlebih dahulu.");
+
   setBusy(true);
+
   try {
-    const result = await api("/api/create", {name, category:state.category}, 90000);
+    const result = await api("/api/create", {
+      name,
+      category:state.category
+    }, 90000);
+
     state.playerName = name;
     state.playerId = result.playerId;
     state.roomCode = result.roomCode;
     state.activeSuspect = null;
+
+    resetChatCache();
     showScreen("case");
     await refreshRoom();
     startPolling();
+
     toast("Ruang dibuat. Bagikan kode kepada temanmu.");
   } catch (error) {
     toast(error.message);
@@ -305,20 +344,28 @@ async function createRoom() {
 
 async function joinRoom() {
   if (state.busy) return;
+
   const name = $("playerName").value.trim();
   const roomCode = $("roomCodeInput").value.trim().toUpperCase();
+
   if (!name) return toast("Masukkan nama detektif terlebih dahulu.");
   if (!roomCode) return toast("Masukkan kode ruang.");
+
   setBusy(true);
+
   try {
     const result = await api("/api/join", {name, roomCode});
+
     state.playerName = name;
     state.playerId = result.playerId;
     state.roomCode = result.roomCode || roomCode;
     state.activeSuspect = null;
+
+    resetChatCache();
     showScreen("case");
     await refreshRoom();
     startPolling();
+
     toast("Berhasil bergabung.");
   } catch (error) {
     toast(error.message);
@@ -334,8 +381,12 @@ function startPolling() {
 
 async function refreshRoom(silent = false) {
   if (!state.roomCode || !state.playerId) return;
+
   try {
-    const result = await api(`/api/room?code=${encodeURIComponent(state.roomCode)}&playerId=${encodeURIComponent(state.playerId)}`);
+    const result = await api(
+      `/api/room?code=${encodeURIComponent(state.roomCode)}&playerId=${encodeURIComponent(state.playerId)}`
+    );
+
     state.room = result.room || result;
     renderRoom();
   } catch (error) {
@@ -346,40 +397,58 @@ async function refreshRoom(silent = false) {
 function renderRoom() {
   const room = state.room;
   if (!room) return;
+
   const c = room.case || {};
+
   $("roomCodeDisplay").textContent = room.code || state.roomCode;
   $("interviewRoomCode").textContent = room.code || state.roomCode;
-  $("caseCategory").textContent = categoryNames[c.category || room.category] || "Misteri";
+  $("caseCategory").textContent =
+    categoryNames[c.category || room.category] || "Misteri";
   $("caseTitle").textContent = c.title || "Kasus baru";
   $("caseDescription").textContent = c.description || "";
-  $("playerStatus").textContent = `${(room.players || []).length}/2 detektif terhubung`;
+  $("playerStatus").textContent =
+    `${(room.players || []).length}/2 detektif terhubung`;
+
   $("playerTags").replaceChildren();
+
   (room.players || []).forEach(player => {
     const tag = document.createElement("span");
     tag.className = "player-tag";
-    tag.textContent = player.name + (player.id === state.playerId ? " (Kamu)" : "");
+    tag.textContent =
+      player.name + (player.id === state.playerId ? " (Kamu)" : "");
     $("playerTags").append(tag);
   });
 
   $("suspectsList").replaceChildren();
-  $("accuseSelect").replaceChildren(new Option("Pilih tersangka...", ""));
+  $("accuseSelect").replaceChildren(
+    new Option("Pilih tersangka...", "")
+  );
+
   (c.suspects || []).forEach(s => {
     const id = s.id || s.name;
     const button = document.createElement("button");
     button.className = "suspect";
+
     const avatar = document.createElement("div");
     avatar.className = "avatar";
-    avatar.textContent = (s.name || "?").trim().charAt(0).toUpperCase();
+    avatar.textContent =
+      (s.name || "?").trim().charAt(0).toUpperCase();
+
     const info = document.createElement("div");
     info.className = "suspect-info";
+
     const name = document.createElement("h3");
     name.textContent = s.name || "Tersangka";
+
     const role = document.createElement("p");
     role.textContent = s.role || "Tersangka";
+
     info.append(name, role);
+
     const arrow = document.createElement("span");
     arrow.className = "chevron";
     arrow.textContent = "›";
+
     button.append(avatar, info, arrow);
     button.addEventListener("click", () => openInterview(id));
     $("suspectsList").append(button);
@@ -387,31 +456,42 @@ function renderRoom() {
   });
 
   $("evidenceList").replaceChildren();
+
   (c.evidence || []).forEach(item => {
     const li = document.createElement("li");
-    li.textContent = typeof item === "string" ? item : (item.description || item.name || "");
+    li.textContent = typeof item === "string"
+      ? item
+      : (item.description || item.name || "");
     $("evidenceList").append(li);
   });
 
   const accusations = room.accusations || [];
   const mine = accusations.find(a => a.playerId === state.playerId);
+
   $("accuseStatus").textContent = mine
     ? "Tuduhanmu sudah dikirim. Menunggu detektif lainnya."
     : `${accusations.length}/2 detektif sudah menuduh.`;
+
   $("accuseSelect").disabled = Boolean(mine) || Boolean(room.verdict);
-  $("accuseBtn").disabled = Boolean(mine) || Boolean(room.verdict) || state.busy;
+  $("accuseBtn").disabled =
+    Boolean(mine) || Boolean(room.verdict) || state.busy;
+
   if (mine) $("accuseSelect").value = mine.suspectId;
 
   if (room.verdict) {
     $("verdictPanel").classList.remove("hidden");
     $("accusationPanel").classList.add("hidden");
+
     $("verdictContent").textContent =
       `Pelaku: ${room.verdict.culpritName || "Tidak diketahui"}\n\n${room.verdict.explanation || ""}`;
+
     $("accusationResults").replaceChildren();
+
     (room.verdict.accusations || []).forEach(a => {
       const tag = document.createElement("span");
       tag.className = "player-tag";
-      tag.textContent = `${a.playerName}: ${a.suspectName} · ${a.correct ? "Benar" : "Keliru"}`;
+      tag.textContent =
+        `${a.playerName}: ${a.suspectName} · ${a.correct ? "Benar" : "Keliru"}`;
       $("accusationResults").append(tag);
     });
   } else {
@@ -419,19 +499,27 @@ function renderRoom() {
     $("accusationPanel").classList.remove("hidden");
   }
 
+  // renderChat sekarang mempertahankan elemen pesan yang sudah ada.
   if (state.activeSuspect) renderChat();
 }
 
 function openInterview(suspectId) {
   const suspects = state.room?.case?.suspects || [];
   const suspect = suspects.find(s => (s.id || s.name) === suspectId);
+
   if (!suspect) return;
+
   state.activeSuspect = suspectId;
-  $("suspectAvatar").textContent = suspect.name.trim().charAt(0).toUpperCase();
+  resetChatCache();
+
+  $("suspectAvatar").textContent =
+    suspect.name.trim().charAt(0).toUpperCase();
+
   $("interviewSuspectName").textContent = suspect.name;
   $("interviewSuspectRole").textContent = suspect.role || "Tersangka";
-  $("interviewState").textContent = "Siap";
+  $("interviewState").textContent = state.thinking ? "Berpikir..." : "Siap";
   $("chatStatus").textContent = "";
+
   renderChat();
   showScreen("interview");
   $("questionInput").focus();
@@ -439,83 +527,179 @@ function openInterview(suspectId) {
 
 function getChatMessages() {
   const messages = state.room?.messages || [];
+
   return messages.filter(m =>
     m.suspectId === state.activeSuspect ||
     (m.suspectId == null && (
       m.playerId === `suspect:${state.activeSuspect}` ||
       (m.suspectName && state.room.case.suspects.find(s =>
-        (s.id || s.name) === state.activeSuspect && s.name === m.suspectName
+        (s.id || s.name) === state.activeSuspect &&
+        s.name === m.suspectName
       ))
     ))
   );
 }
 
-function renderChat() {
-  const log = $("chatLog");
-  if (!state.activeSuspect || !state.room) return;
-  const messages = getChatMessages();
-  log.replaceChildren();
+function makeMessageNode(m) {
+  const mine = m.playerId === state.playerId;
+  const system = m.playerId === "system";
 
-  if (!messages.length) {
-    const intro = document.createElement("div");
-    intro.className = "message system";
-    intro.textContent = "Interogasi dimulai. Apa yang ingin kamu ketahui?";
-    log.append(intro);
+  const bubble = document.createElement("div");
+  bubble.className =
+    "message" +
+    (mine ? " mine" : "") +
+    (system ? " system" : "");
+
+  if (!system) {
+    const who = document.createElement("div");
+    who.className = "who";
+    who.textContent = mine
+      ? "Kamu"
+      : (m.playerName || $("interviewSuspectName").textContent);
+
+    const text = document.createElement("div");
+    text.className = "body";
+    text.textContent = m.text || m.content || "";
+
+    bubble.append(who, text);
+  } else {
+    bubble.textContent = m.text || "";
   }
 
-  messages.forEach(m => {
-    const mine = m.playerId === state.playerId;
-    const system = m.playerId === "system";
-    const bubble = document.createElement("div");
-    bubble.className = "message" + (mine ? " mine" : "") + (system ? " system" : "");
-    if (!system) {
-      const who = document.createElement("div");
-      who.className = "who";
-      who.textContent = mine ? "Kamu" : (m.playerName || $("interviewSuspectName").textContent);
-      const text = document.createElement("div");
-      text.className = "body";
-      text.textContent = m.text || m.content || "";
-      bubble.append(who, text);
-    } else {
-      bubble.textContent = m.text || "";
+  return bubble;
+}
+
+function makeTypingNode() {
+  const typing = document.createElement("div");
+  typing.className = "typing";
+
+  const label = document.createElement("span");
+  label.textContent =
+    `${$("interviewSuspectName").textContent} sedang mengetik`;
+
+  const dots = document.createElement("span");
+  dots.className = "dots";
+
+  for (let i = 0; i < 3; i++) {
+    dots.append(document.createElement("span"));
+  }
+
+  typing.append(label, dots);
+  return typing;
+}
+
+function renderChat() {
+  const log = $("chatLog");
+
+  if (!state.activeSuspect || !state.room) return;
+
+  const messages = getChatMessages();
+
+  // Isi pesan tidak berubah? Jangan sentuh DOM sama sekali.
+  const signature = JSON.stringify({
+    suspect: state.activeSuspect,
+    messages: messages.map(m => [
+      m.playerId,
+      m.playerName,
+      m.suspectId,
+      m.text || m.content || "",
+      m.kind || ""
+    ]),
+    thinking: state.thinking
+  });
+
+  if (signature === lastChatSignature) return;
+
+  const distanceFromBottom =
+    log.scrollHeight - log.scrollTop - log.clientHeight;
+  const wasNearBottom = distanceFromBottom < 90;
+  const previousScrollTop = log.scrollTop;
+
+  // Pertahankan node pesan yang sudah tampil, tambahkan hanya pesan baru.
+  const nextNodes = new Map();
+  const fragment = document.createDocumentFragment();
+
+  if (!messages.length) {
+    if (!introNode) {
+      introNode = document.createElement("div");
+      introNode.className = "message system";
+      introNode.textContent =
+        "Interogasi dimulai. Apa yang ingin kamu ketahui?";
     }
-    log.append(bubble);
+
+    fragment.append(introNode);
+  }
+
+  messages.forEach((m, index) => {
+    const key = [
+      m.playerId || "",
+      m.suspectId || "",
+      m.at || "",
+      index,
+      m.text || m.content || ""
+    ].join("|");
+
+    let node = renderedChatNodes.get(key);
+
+    if (!node) {
+      node = makeMessageNode(m);
+    }
+
+    nextNodes.set(key, node);
+    fragment.append(node);
   });
 
   if (state.thinking) {
-    const typing = document.createElement("div");
-    typing.className = "typing";
-    const label = document.createElement("span");
-    label.textContent = `${$("interviewSuspectName").textContent} sedang mengetik`;
-    const dots = document.createElement("span");
-    dots.className = "dots";
-    for (let i = 0; i < 3; i++) dots.append(document.createElement("span"));
-    typing.append(label, dots);
-    log.append(typing);
+    if (!typingNode) typingNode = makeTypingNode();
+    fragment.append(typingNode);
+  } else {
+    typingNode = null;
   }
-  log.scrollTop = log.scrollHeight;
+
+  // replaceChildren dengan node lama yang sama tidak memicu animasi ulang
+  // pada bubble yang dipertahankan, berbeda dengan membuat ulang semua bubble.
+  log.replaceChildren(fragment);
+
+  renderedChatNodes = nextNodes;
+  lastChatSignature = signature;
+
+  if (wasNearBottom) {
+    log.scrollTop = log.scrollHeight;
+  } else {
+    log.scrollTop = previousScrollTop;
+  }
 }
 
 function setThinking(value) {
   state.thinking = value;
+
   $("sendBtn").disabled = value || state.busy;
   $("questionInput").disabled = value;
   $("interviewState").textContent = value ? "Berpikir..." : "Siap";
+
   $("chatStatus").textContent = value
     ? `${$("interviewSuspectName").textContent} sedang menyusun jawaban...`
     : "";
+
   renderChat();
 }
 
 async function sendQuestion(event) {
   event.preventDefault();
+
   if (state.busy || state.thinking) return;
-  if (!state.activeSuspect) return toast("Pilih tersangka terlebih dahulu.");
+  if (!state.activeSuspect) {
+    return toast("Pilih tersangka terlebih dahulu.");
+  }
+
   const input = $("questionInput");
   const text = input.value.trim();
+
   if (!text) return;
+
   input.value = "";
   setThinking(true);
+
   try {
     await api("/api/talk", {
       roomCode: state.roomCode,
@@ -523,6 +707,7 @@ async function sendQuestion(event) {
       suspectId: state.activeSuspect,
       text
     }, 60000);
+
     await refreshRoom();
   } catch (error) {
     toast(error.message);
@@ -535,15 +720,22 @@ async function sendQuestion(event) {
 
 async function sendAccusation() {
   if (state.busy) return;
+
   const suspectId = $("accuseSelect").value;
-  if (!suspectId) return toast("Pilih tersangka terlebih dahulu.");
+
+  if (!suspectId) {
+    return toast("Pilih tersangka terlebih dahulu.");
+  }
+
   setBusy(true);
+
   try {
     await api("/api/accuse", {
       roomCode: state.roomCode,
       playerId: state.playerId,
       suspectId
     });
+
     await refreshRoom();
     toast("Tuduhan berhasil dikirim.");
   } catch (error) {
@@ -556,18 +748,26 @@ async function sendAccusation() {
 $("createBtn").addEventListener("click", createRoom);
 $("joinBtn").addEventListener("click", joinRoom);
 $("chatForm").addEventListener("submit", sendQuestion);
-$("backToCase").addEventListener("click", () => showScreen("case"));
+
+$("backToCase").addEventListener("click", () => {
+  showScreen("case");
+});
+
 $("leaveBtn").addEventListener("click", () => {
   resetRoom();
   showScreen("setup");
 });
+
 $("accuseBtn").addEventListener("click", sendAccusation);
+
 $("newCaseBtn").addEventListener("click", () => {
   const previousName = state.playerName || $("playerName").value;
+
   resetRoom();
   $("playerName").value = previousName;
   selectCategory("random");
   showScreen("setup");
+
   toast("Pilih kategori dan buat ruang baru.");
 });
 
