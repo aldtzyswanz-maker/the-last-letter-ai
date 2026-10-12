@@ -1,937 +1,609 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#0b0e14">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111214">
   <title>THE LAST LETTER</title>
   <style>
     :root {
-      --bg: #0b0e14;
-      --panel: #141923;
-      --panel2: #1b2230;
-      --line: #2b3445;
-      --text: #edf1f8;
-      --muted: #9aa6ba;
-      --accent: #c6a66b;
-      --danger: #d66c70;
-      --green: #7bc5a4;
+      color-scheme: dark;
+      --bg: #111214;
+      --panel: #191a1e;
+      --panel2: #202126;
+      --line: #303137;
+      --text: #f1f1f3;
+      --muted: #999ba5;
+      --gold: #c8a96b;
+      --danger: #dc7777;
+      --green: #8bc6a3;
+      --radius: 14px;
     }
 
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
-      background:
-        radial-gradient(ellipse at top, #1b2433 0%, var(--bg) 58%);
+      background: var(--bg);
       color: var(--text);
-      font-family: Georgia, "Times New Roman", serif;
-      min-height: 100vh;
-    }
-
-    button, input, select, textarea { font: inherit; }
-
-    button {
-      border: 1px solid #6d5b3e;
-      border-radius: 8px;
-      padding: 12px 16px;
-      background: var(--accent);
-      color: #15120d;
-      font-weight: bold;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-
-    button:hover { filter: brightness(1.1); }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    button.secondary {
-      background: var(--panel2);
-      border-color: var(--line);
-      color: var(--text);
-    }
-
-    button.danger {
-      background: #53292d;
-      color: #ffe8e8;
-      border-color: #8c454b;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 12px;
-      color: var(--text);
-      background: #0e121a;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      outline: none;
-    }
-
-    input:focus, select:focus, textarea:focus {
-      border-color: var(--accent);
-    }
-
-    textarea { resize: vertical; min-height: 82px; }
-
-    .hidden { display: none !important; }
-
-    .container {
-      width: min(1100px, 100%);
-      padding: 22px;
-      margin: auto;
-    }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      border-bottom: 1px solid var(--line);
-      padding-bottom: 16px;
-      margin-bottom: 25px;
-    }
-
-    .brand {
-      color: var(--accent);
-      letter-spacing: 3px;
-      font-size: 13px;
-      font-weight: bold;
-    }
-
-    .eyebrow {
-      color: var(--accent);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      font-size: 11px;
-    }
-
-    h1 {
-      font-size: clamp(34px, 7vw, 64px);
-      line-height: 1.05;
-      margin: 12px 0;
-      letter-spacing: -1px;
-    }
-
-    h2 { margin-top: 0; font-size: 22px; }
-    h3 { margin-top: 0; }
-    p { line-height: 1.65; }
-
-    .muted { color: var(--muted); }
-    .accent { color: var(--accent); }
-
-    .hero {
-      padding: clamp(24px, 6vw, 65px) 0 35px;
-      max-width: 760px;
-    }
-
-    .hero p {
-      max-width: 580px;
-      color: var(--muted);
-      font-size: 17px;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-    }
-
-    .panel {
-      background: linear-gradient(145deg, var(--panel), #10141c);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 20px;
-      min-width: 0;
-    }
-
-    .field { margin: 14px 0; }
-    .field label {
-      display: block;
-      margin-bottom: 7px;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .row {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .row > * { min-width: 0; }
-    .row input { flex: 1; }
-
-    .status {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 14px;
-      min-height: 18px;
-    }
-
-    .status.error { color: var(--danger); }
-    .status.success { color: var(--green); }
-
-    .room-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-bottom: 18px;
-    }
-
-    .room-code {
-      color: var(--accent);
-      font-size: 21px;
-      letter-spacing: 4px;
-      font-weight: bold;
-    }
-
-    .case-intro {
-      white-space: pre-wrap;
-      color: #d5dce8;
-    }
-
-    .suspects {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .suspect {
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 14px;
-      background: #111722;
-      cursor: pointer;
-      text-align: left;
-      color: var(--text);
-      width: 100%;
-    }
-
-    .suspect.active {
-      border-color: var(--accent);
-      background: #24251f;
-    }
-
-    .suspect-name { font-weight: bold; margin-bottom: 6px; }
-    .suspect-role { font-size: 12px; color: var(--muted); }
-
-    .chat-log {
-      height: 300px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      padding: 12px;
-      background: #0c1017;
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      margin: 12px 0;
-    }
-
-    .message {
-      padding: 11px 12px;
-      border-radius: 9px;
-      max-width: 92%;
-      line-height: 1.5;
-      overflow-wrap: anywhere;
-      white-space: pre-wrap;
-    }
-
-    .message.player {
-      align-self: flex-end;
-      background: #333022;
-      border: 1px solid #655538;
-    }
-
-    .message.suspect {
-      align-self: flex-start;
-      background: #192130;
-      border: 1px solid #2d394b;
-    }
-
-    .message.system {
-      align-self: center;
-      color: var(--muted);
-      font-size: 12px;
-      text-align: center;
-      background: transparent;
-    }
-
-    .evidence-item {
-      border-left: 3px solid var(--accent);
-      background: #111722;
-      padding: 12px;
-      margin: 10px 0;
-      border-radius: 0 8px 8px 0;
-      line-height: 1.5;
-    }
-
-    .evidence-item small {
-      display: block;
-      color: var(--muted);
-      margin-top: 5px;
-    }
-
-    .empty {
-      color: var(--muted);
-      padding: 12px 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system,
+        BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: 14px;
+      line-height: 1.6;
     }
-
-    .verdict {
-      border: 1px solid var(--accent);
-      background: #201f19;
-      border-radius: 12px;
-      padding: 20px;
-      margin-top: 18px;
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .wrap { width: min(1050px, 100% - 32px); margin: auto; }
+    header {
+      height: 72px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-
-    .verdict h2 { color: var(--accent); }
-
-    .footer {
-      border-top: 1px solid var(--line);
-      margin-top: 35px;
-      padding: 20px 0;
-      text-align: center;
-      color: #667186;
-      font-size: 12px;
+    .brand { font-size: 15px; font-weight: 800; letter-spacing: 2px; }
+    .brand span { color: var(--gold); }
+    .status { color: var(--muted); font-size: 12px; }
+    main { padding: 44px 0 70px; }
+    .hero { max-width: 650px; margin: 10px auto 30px; text-align: center; }
+    .eyebrow {
+      color: var(--gold); font-size: 11px; font-weight: 700;
+      letter-spacing: 2.5px; text-transform: uppercase;
     }
-
+    h1 { font-size: clamp(34px, 7vw, 56px); line-height: 1.08;
+      letter-spacing: -2px; margin: 12px 0; }
+    h2 { font-size: 19px; margin: 0 0 16px; letter-spacing: -.4px; }
+    h3 { font-size: 14px; margin: 0; }
+    p { color: var(--muted); }
+    .hero p { max-width: 490px; margin: 0 auto; }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 22px;
+    }
+    .setup { max-width: 660px; margin: auto; }
+    .field { margin: 18px 0; }
+    label { display: block; color: #d7d7dc; font-size: 12px;
+      font-weight: 650; margin-bottom: 8px; }
+    input, select, textarea {
+      width: 100%; color: var(--text); background: #121316;
+      border: 1px solid var(--line); border-radius: 10px;
+      padding: 12px 13px; outline: none;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+    input::placeholder, textarea::placeholder { color: #686a73; }
+    .categories {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px;
+    }
+    .category {
+      border: 1px solid var(--line); border-radius: 11px;
+      padding: 12px 10px; background: #141518; color: var(--text);
+      text-align: left; min-height: 76px; transition: .15s;
+    }
+    .category strong { display: block; font-size: 13px; margin-bottom: 3px; }
+    .category small { color: var(--muted); font-size: 11px; }
+    .category.active { border-color: var(--gold); background: #282319; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn {
+      padding: 11px 16px; border: 1px solid var(--line);
+      border-radius: 10px; background: var(--panel2); color: var(--text);
+      font-weight: 650;
+    }
+    .btn.primary { background: var(--gold); color: #17140f; border-color: var(--gold); }
+    .btn.ghost { background: transparent; }
+    .btn.danger { border-color: #684040; color: #f1aaaa; }
+    .actions .btn { flex: 1; }
+    .separator { display: flex; align-items: center; gap: 12px;
+      color: var(--muted); font-size: 11px; margin: 18px 0; }
+    .separator:before, .separator:after { content: ""; flex: 1; height: 1px; background: var(--line); }
+    .joinrow { display: grid; grid-template-columns: 1fr auto; gap: 9px; }
+    .notice { margin-top: 15px; font-size: 12px; color: var(--muted); }
+    .hidden { display: none !important; }
+    .game-top {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
+    }
+    .room-code { color: var(--gold); letter-spacing: 2px; font-weight: 800; }
+    .game-grid { display: grid; grid-template-columns: 1fr 1.25fr; gap: 15px; }
+    .stack { display: grid; gap: 15px; align-content: start; }
+    .case-title { font-size: 23px; line-height: 1.25; margin: 8px 0; }
+    .case-meta { color: var(--gold); font-size: 11px; text-transform: uppercase;
+      letter-spacing: 1.4px; font-weight: 700; }
+    .case-description { margin: 8px 0 0; white-space: pre-wrap; }
+    .suspect {
+      border: 1px solid var(--line); border-radius: 10px;
+      padding: 12px; margin-top: 9px; background: #151619;
+    }
+    .suspect-top { display: flex; justify-content: space-between; gap: 8px; }
+    .suspect p { font-size: 12px; margin: 4px 0 0; }
+    .tag { color: var(--muted); font-size: 10px; border: 1px solid var(--line);
+      border-radius: 6px; padding: 2px 6px; height: fit-content; }
+    .evidence-list { padding-left: 18px; margin: 8px 0 0; color: #c5c5cc; }
+    .evidence-list li { margin: 7px 0; }
+    .chatlog {
+      height: 290px; overflow-y: auto; display: flex; flex-direction: column;
+      gap: 10px; padding: 12px; border-radius: 10px;
+      border: 1px solid var(--line); background: #121316;
+    }
+    .message { max-width: 92%; padding: 10px 12px; border-radius: 10px;
+      background: var(--panel2); overflow-wrap: anywhere; }
+    .message.mine { align-self: flex-end; background: #342d20; }
+    .message .who { font-size: 10px; color: var(--gold); margin-bottom: 4px; }
+    .message .body { white-space: pre-wrap; }
+    .chat-controls { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 9px; }
+    .chat-controls input { min-width: 0; }
+    .muted { color: var(--muted); font-size: 12px; }
+    .verdict { border: 1px solid #665637; background: #211d16; }
+    .verdict h2 { color: var(--gold); }
+    .verdict p { white-space: pre-wrap; }
+    .footer { text-align: center; color: #696b74; font-size: 11px; margin-top: 32px; }
+    #toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: #27282d; border: 1px solid var(--line); border-radius: 10px;
+      padding: 11px 16px; max-width: calc(100% - 30px); z-index: 5;
+      box-shadow: 0 8px 30px #0006;
+    }
     @media (max-width: 700px) {
-      .container { padding: 16px; }
-      .grid, .suspects { grid-template-columns: 1fr; }
-      .panel { padding: 16px; }
-      .chat-log { height: 260px; }
-      header { align-items: flex-start; }
+      main { padding-top: 28px; }
+      .game-grid { grid-template-columns: 1fr; }
+      .categories { grid-template-columns: repeat(2, 1fr); }
+      .panel { padding: 17px; }
+      .chatlog { height: 260px; }
+      h1 { letter-spacing: -1.5px; }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div>
-        <div class="brand">THE LAST LETTER</div>
-        <div class="muted" style="font-size:12px;margin-top:5px">
-          A mystery shared by two minds
-        </div>
-      </div>
-      <div class="eyebrow">CASE FILE / CLASSIFIED</div>
-    </header>
+<header class="wrap">
+  <div class="brand">THE LAST <span>LETTER</span></div>
+  <div class="status" id="connectionStatus">MYSTERY ROOM</div>
+</header>
 
-    <!-- HALAMAN AWAL -->
-    <section id="setupScreen">
-      <div class="hero">
-        <div class="eyebrow">Every secret leaves a trace</div>
-        <h1>THE LAST<br><span class="accent">LETTER.</span></h1>
-        <p>
-          Sebuah misteri, empat tersangka, dan satu kebenaran yang tersembunyi.
-          Selidiki kasus bersama temanmu, bandingkan petunjuk, dan temukan siapa
-          yang sebenarnya bersalah.
-        </p>
-      </div>
-
-      <div class="grid">
-        <div class="panel">
-          <div class="eyebrow">01 / Start a case</div>
-          <h2 style="margin-top:12px">Buat Ruangan</h2>
-          <p class="muted">Jadilah pemain pertama dan undang temanmu menggunakan kode room.</p>
-
-          <div class="field">
-            <label for="createName">Nama pemain</label>
-            <input id="createName" maxlength="24" placeholder="Masukkan nama kamu">
-          </div>
-
-          <button id="createBtn" style="width:100%">Buat Kasus Baru</button>
-          <div id="createStatus" class="status"></div>
-        </div>
-
-        <div class="panel">
-          <div class="eyebrow">02 / Join investigation</div>
-          <h2 style="margin-top:12px">Gabung Ruangan</h2>
-          <p class="muted">Masukkan kode dari temanmu untuk menyelidiki kasus yang sama.</p>
-
-          <div class="field">
-            <label for="joinName">Nama pemain</label>
-            <input id="joinName" maxlength="24" placeholder="Masukkan nama kamu">
-          </div>
-
-          <div class="field">
-            <label for="joinCode">Kode room</label>
-            <input id="joinCode" maxlength="8" placeholder="Contoh: A7K9P2"
-                   style="text-transform:uppercase">
-          </div>
-
-          <button id="joinBtn" style="width:100%">Gabung Investigasi</button>
-          <div id="joinStatus" class="status"></div>
-        </div>
-      </div>
-    </section>
-
-    <!-- HALAMAN PERMAINAN -->
-    <section id="gameScreen" class="hidden">
-      <div class="room-bar">
-        <div>
-          <div class="eyebrow">Active investigation</div>
-          <div style="margin-top:6px">
-            Kode room: <span id="roomCode" class="room-code">------</span>
-            <button id="copyCodeBtn" class="secondary" style="padding:7px 10px;margin-left:8px">
-              Salin
-            </button>
-          </div>
-          <div id="playerStatus" class="muted" style="font-size:13px;margin-top:7px"></div>
-        </div>
-        <button id="backBtn" class="secondary">Keluar ke Awal</button>
-      </div>
-
-      <div class="panel" style="margin-bottom:16px">
-        <div class="eyebrow">Case briefing</div>
-        <h2 id="caseTitle" style="margin-top:10px">Memuat kasus...</h2>
-        <div id="caseIntro" class="case-intro"></div>
-      </div>
-
-      <div class="grid">
-        <div class="panel">
-          <div class="eyebrow">Suspects / 04</div>
-          <h2 style="margin-top:10px">Daftar Tersangka</h2>
-          <p class="muted" style="font-size:13px">
-            Pilih seseorang untuk memulai interogasi.
-          </p>
-          <div id="suspectList" class="suspects"></div>
-        </div>
-
-        <div class="panel">
-          <div class="eyebrow">Interrogation room</div>
-          <h2 id="selectedSuspect" style="margin-top:10px">Pilih tersangka</h2>
-          <div id="chatLog" class="chat-log">
-            <div class="message system">Pilih tersangka untuk memulai percakapan.</div>
-          </div>
-
-          <form id="talkForm">
-            <textarea id="questionInput" maxlength="500"
-              placeholder="Tanyakan sesuatu kepada tersangka..."></textarea>
-            <button id="sendBtn" type="submit" style="width:100%;margin-top:10px">
-              Kirim Pertanyaan
-            </button>
-          </form>
-          <div id="talkStatus" class="status"></div>
-        </div>
-
-        <div class="panel">
-          <div class="eyebrow">Evidence archive</div>
-          <h2 style="margin-top:10px">Bukti yang Ditemukan</h2>
-          <div id="evidenceList"></div>
-        </div>
-
-        <div class="panel">
-          <div class="eyebrow">Final deduction</div>
-          <h2 style="margin-top:10px">Tuduh Pelaku</h2>
-          <p class="muted" style="font-size:13px">
-            Diskusikan temuanmu dengan pemain lain sebelum mengambil keputusan.
-          </p>
-
-          <div class="field">
-            <label for="accuseSelect">Siapa pelakunya?</label>
-            <select id="accuseSelect">
-              <option value="">Pilih tersangka...</option>
-            </select>
-          </div>
-
-          <div class="field">
-            <label for="reasonInput">Alasan tuduhan (opsional)</label>
-            <textarea id="reasonInput" maxlength="500"
-              placeholder="Jelaskan petunjuk yang mendukung tuduhanmu..."></textarea>
-          </div>
-
-          <button id="accuseBtn" class="danger" style="width:100%">
-            Kunci Tuduhan
-          </button>
-          <div id="accuseStatus" class="status"></div>
-          <div id="verdictBox" class="verdict hidden"></div>
-
-          <button id="newCaseBtn" class="hidden" style="width:100%;margin-top:14px">
-            Kasus Baru
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <div class="footer">
-      THE LAST LETTER · The truth is never just one conversation away.
+<main class="wrap">
+  <section id="setupScreen">
+    <div class="hero">
+      <div class="eyebrow">A multiplayer mystery</div>
+      <h1>Setiap petunjuk<br>menyimpan rahasia.</h1>
+      <p>Masuki sebuah kasus, interogasi para tersangka, kumpulkan bukti, dan cari tahu siapa yang berbohong.</p>
     </div>
-  </div>
 
-  <script>
-    const API_BASE = "https://the-last-letter-ai.aldiriyadismg04.workers.dev";
+    <div class="panel setup">
+      <h2>Mulai penyelidikan</h2>
+      <div class="field">
+        <label for="playerName">NAMA DETEKTIF</label>
+        <input id="playerName" maxlength="24" placeholder="Masukkan nama kamu">
+      </div>
 
-    const $ = (id) => document.getElementById(id);
+      <div class="field">
+        <label>PILIH JENIS KASUS</label>
+        <div class="categories" id="categories">
+          <button class="category active" data-type="random"><strong>Kasus acak</strong><small>Kejutan misteri</small></button>
+          <button class="category" data-type="murder"><strong>Pembunuhan</strong><small>Mengungkap pelaku</small></button>
+          <button class="category" data-type="robbery"><strong>Perampokan</strong><small>Barang yang hilang</small></button>
+          <button class="category" data-type="kidnapping"><strong>Penculikan</strong><small>Mencari korban</small></button>
+          <button class="category" data-type="fraud"><strong>Penipuan</strong><small>Jejak kebohongan</small></button>
+          <button class="category" data-type="missing"><strong>Orang hilang</strong><small>Mencari kebenaran</small></button>
+          <button class="category" data-type="theft"><strong>Pencurian</strong><small>Siapa mengambilnya?</small></button>
+          <button class="category" data-type="blackmail"><strong>Pemerasan</strong><small>Rahasia tersembunyi</small></button>
+        </div>
+      </div>
 
-    let currentRoom = null;
-    let playerId = null;
-    let playerName = "";
-    let selectedSuspectId = null;
-    let pollTimer = null;
-    let isBusy = false;
-    let lastRoomSnapshot = "";
+      <div class="actions">
+        <button class="btn primary" id="createBtn">Buat ruang baru</button>
+      </div>
 
-    async function api(path, options = {}) {
-      const response = await fetch(API_BASE + path, {
-        method: options.method || "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...(options.headers || {})
-        },
-        body: options.body ? JSON.stringify(options.body) : undefined
+      <div class="separator">ATAU GABUNG TEMAN</div>
+      <div class="joinrow">
+        <input id="roomCodeInput" maxlength="8" placeholder="Kode ruang">
+        <button class="btn" id="joinBtn">Gabung</button>
+      </div>
+      <div class="notice">Main berdua. Bagikan kode ruang kepada temanmu agar bisa ikut menyelidiki kasus yang sama.</div>
+    </div>
+  </section>
+
+  <section id="gameScreen" class="hidden">
+    <div class="game-top">
+      <div>
+        <div class="muted">KODE RUANG</div>
+        <div class="room-code" id="roomCodeDisplay">--------</div>
+        <div class="muted" id="playerStatus">Menunggu pemain...</div>
+      </div>
+      <button class="btn ghost" id="leaveBtn">Kembali ke awal</button>
+    </div>
+
+    <div class="game-grid">
+      <div class="stack">
+        <div class="panel">
+          <div class="case-meta" id="caseCategory">KASUS</div>
+          <h2 class="case-title" id="caseTitle">Memuat kasus...</h2>
+          <p class="case-description" id="caseDescription"></p>
+        </div>
+
+        <div class="panel">
+          <h2>Para tersangka</h2>
+          <div id="suspectsList"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Barang bukti</h2>
+          <ul class="evidence-list" id="evidenceList"></ul>
+        </div>
+
+        <div class="panel" id="accusationPanel">
+          <h2>Siapa pelakunya?</h2>
+          <p class="muted">Pilih tersangka yang menurutmu bertanggung jawab. Hasil akhir dibuka setelah kedua detektif menuduh.</p>
+          <div class="field">
+            <select id="accuseSelect"><option value="">Pilih tersangka...</option></select>
+          </div>
+          <button class="btn primary" id="accuseBtn">Kirim tuduhan</button>
+          <div class="notice" id="accuseStatus"></div>
+        </div>
+
+        <div class="panel verdict hidden" id="verdictPanel">
+          <h2>Kasus terungkap</h2>
+          <div id="verdictContent"></div>
+          <button class="btn primary" id="newCaseBtn">Mulai kasus baru</button>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="panel">
+          <h2>Ruang interogasi</h2>
+          <p class="muted">Pilih tersangka melalui pesanmu. Tanyakan alibi, motif, atau bukti yang bertentangan.</p>
+          <div class="chatlog" id="chatLog">
+            <div class="muted">Percakapan akan muncul di sini.</div>
+          </div>
+          <div class="chat-controls">
+            <input id="questionInput" maxlength="500" placeholder="Tanyakan sesuatu...">
+            <button class="btn primary" id="sendBtn">Kirim</button>
+          </div>
+          <div class="notice">Format contoh: <em>Interogasi Raka: Di mana kamu saat kejadian?</em></div>
+        </div>
+        <div class="panel">
+          <h2>Catatan detektif</h2>
+          <p class="muted">Diskusikan petunjuk dengan temanmu di luar game. Jangan terburu-buru mengambil kesimpulan dari satu jawaban.</p>
+          <div class="muted" id="roomHint">Kasus sedang disiapkan.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="footer">THE LAST LETTER · Two detectives, one truth.</div>
+</main>
+<div id="toast" class="hidden"></div>
+
+<script>
+  const API_BASE = "https://the-last-letter-ai.aldiriyadismg04.workers.dev";
+
+  const $ = id => document.getElementById(id);
+  const state = {
+    category: "random",
+    roomCode: "",
+    playerId: "",
+    playerName: "",
+    room: null,
+    poll: null,
+    busy: false
+  };
+
+  const categoryNames = {
+    random: "Kasus acak",
+    murder: "Pembunuhan",
+    robbery: "Perampokan",
+    kidnapping: "Penculikan",
+    fraud: "Penipuan",
+    missing: "Orang hilang",
+    theft: "Pencurian",
+    blackmail: "Pemerasan"
+  };
+
+  function toast(message) {
+    const el = $("toast");
+    el.textContent = message;
+    el.classList.remove("hidden");
+    clearTimeout(toast.timer);
+    toast.timer = setTimeout(() => el.classList.add("hidden"), 3200);
+  }
+
+  async function api(path, data) {
+    const response = await fetch(API_BASE + path, {
+      method: data ? "POST" : "GET",
+      headers: data ? { "Content-Type": "application/json" } : {},
+      body: data ? JSON.stringify(data) : undefined
+    });
+    const result = await response.json().catch(() => ({}));
+    if (!response.ok || result.error) {
+      throw new Error(result.error || "Permintaan gagal. Coba lagi.");
+    }
+    return result;
+  }
+
+  function setBusy(value) {
+    state.busy = value;
+    $("createBtn").disabled = value;
+    $("joinBtn").disabled = value;
+    $("sendBtn").disabled = value;
+    $("accuseBtn").disabled = value;
+    $("connectionStatus").textContent = value ? "MEMPROSES..." : "MYSTERY ROOM";
+  }
+
+  document.querySelectorAll(".category").forEach(button => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll(".category").forEach(b => b.classList.remove("active"));
+      button.classList.add("active");
+      state.category = button.dataset.type;
+    });
+  });
+
+  function showSetup() {
+    if (state.poll) clearInterval(state.poll);
+    state.poll = null;
+    state.roomCode = "";
+    state.playerId = "";
+    state.room = null;
+    $("gameScreen").classList.add("hidden");
+    $("setupScreen").classList.remove("hidden");
+    $("connectionStatus").textContent = "MYSTERY ROOM";
+    $("roomCodeInput").value = "";
+    $("questionInput").value = "";
+  }
+
+  function showGame() {
+    $("setupScreen").classList.add("hidden");
+    $("gameScreen").classList.remove("hidden");
+  }
+
+  async function createRoom() {
+    if (state.busy) return;
+    const name = $("playerName").value.trim();
+    if (!name) return toast("Masukkan nama detektif terlebih dahulu.");
+
+    setBusy(true);
+    try {
+      const result = await api("/api/create", {
+        name,
+        category: state.category
       });
-
-      const data = await response.json().catch(() => ({}));
-
-      if (!response.ok || data.error) {
-        throw new Error(data.error || "Permintaan gagal. Coba lagi.");
-      }
-
-      return data;
+      state.playerName = name;
+      state.playerId = result.playerId;
+      state.roomCode = result.roomCode;
+      showGame();
+      await refreshRoom();
+      startPolling();
+      toast("Ruang berhasil dibuat. Bagikan kode ke temanmu.");
+    } catch (error) {
+      toast(error.message);
+    } finally {
+      setBusy(false);
     }
+  }
 
-    function setStatus(id, message, type = "") {
-      const el = $(id);
-      el.textContent = message || "";
-      el.className = "status" + (type ? " " + type : "");
+  async function joinRoom() {
+    if (state.busy) return;
+    const name = $("playerName").value.trim();
+    const code = $("roomCodeInput").value.trim().toUpperCase();
+    if (!name) return toast("Masukkan nama detektif terlebih dahulu.");
+    if (!code) return toast("Masukkan kode ruang.");
+
+    setBusy(true);
+    try {
+      const result = await api("/api/join", { name, roomCode: code });
+      state.playerName = name;
+      state.playerId = result.playerId;
+      state.roomCode = result.roomCode || code;
+      showGame();
+      await refreshRoom();
+      startPolling();
+      toast("Berhasil bergabung ke ruang.");
+    } catch (error) {
+      toast(error.message);
+    } finally {
+      setBusy(false);
     }
+  }
 
-    function setBusy(busy) {
-      isBusy = busy;
-      $("createBtn").disabled = busy;
-      $("joinBtn").disabled = busy;
-      $("sendBtn").disabled = busy;
-      $("accuseBtn").disabled = busy;
-    }
+  function startPolling() {
+    if (state.poll) clearInterval(state.poll);
+    state.poll = setInterval(() => refreshRoom(true), 3000);
+  }
 
-    function stopPolling() {
-      if (pollTimer) clearInterval(pollTimer);
-      pollTimer = null;
-    }
-
-    function showSetup() {
-      stopPolling();
-      currentRoom = null;
-      playerId = null;
-      playerName = "";
-      selectedSuspectId = null;
-      lastRoomSnapshot = "";
-
-      $("setupScreen").classList.remove("hidden");
-      $("gameScreen").classList.add("hidden");
-      $("createStatus").textContent = "";
-      $("joinStatus").textContent = "";
-      $("createBtn").disabled = false;
-      $("joinBtn").disabled = false;
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function showGame() {
-      $("setupScreen").classList.add("hidden");
-      $("gameScreen").classList.remove("hidden");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    async function createRoom() {
-      if (isBusy) return;
-
-      playerName = $("createName").value.trim();
-      if (!playerName) {
-        setStatus("createStatus", "Masukkan nama pemain terlebih dahulu.", "error");
-        return;
-      }
-
-      setBusy(true);
-      setStatus("createStatus", "Sedang menyusun berkas kasus...");
-
-      try {
-        const data = await api("/api/create", {
-          method: "POST",
-          body: { name: playerName }
-        });
-
-        currentRoom = data.room;
-        playerId = data.playerId;
-        selectedSuspectId = null;
-        showGame();
-        renderRoom(currentRoom);
-        startPolling();
-      } catch (error) {
-        setStatus("createStatus", error.message, "error");
-      } finally {
-        setBusy(false);
-      }
-    }
-
-    async function joinRoom() {
-      if (isBusy) return;
-
-      playerName = $("joinName").value.trim();
-      const code = $("joinCode").value.trim().toUpperCase();
-
-      if (!playerName || !code) {
-        setStatus("joinStatus", "Isi nama pemain dan kode room.", "error");
-        return;
-      }
-
-      setBusy(true);
-      setStatus("joinStatus", "Menghubungkan ke ruangan...");
-
-      try {
-        const data = await api("/api/join", {
-          method: "POST",
-          body: { name: playerName, code }
-        });
-
-        currentRoom = data.room;
-        playerId = data.playerId;
-        selectedSuspectId = null;
-        showGame();
-        renderRoom(currentRoom);
-        startPolling();
-      } catch (error) {
-        setStatus("joinStatus", error.message, "error");
-      } finally {
-        setBusy(false);
-      }
-    }
-
-    function startPolling() {
-      stopPolling();
-      refreshRoom();
-      pollTimer = setInterval(refreshRoom, 2500);
-    }
-
-    async function refreshRoom() {
-      if (!currentRoom || !playerId) return;
-
-      try {
-        const data = await api(
-          "/api/room?code=" + encodeURIComponent(currentRoom.code)
-          + "&playerId=" + encodeURIComponent(playerId)
-        );
-
-        currentRoom = data.room;
-        renderRoom(currentRoom);
-      } catch (error) {
-        setStatus("talkStatus", error.message, "error");
-      }
-    }
-
-    function renderRoom(room) {
-      if (!room) return;
-
-      const snapshot = JSON.stringify(room);
-      const changed = snapshot !== lastRoomSnapshot;
-      lastRoomSnapshot = snapshot;
-
-      $("roomCode").textContent = room.code || "------";
-      const players = room.players || [];
-      $("playerStatus").textContent =
-        "Pemain: " + players.map(p => p.name).join(" & ")
-        + (players.length < 2 ? " · Menunggu pemain kedua..." : " · Terhubung");
-
-      $("caseTitle").textContent = room.case?.title || "Kasus Misterius";
-      $("caseIntro").textContent = room.case?.intro || "Berkas kasus sedang disiapkan.";
-
-      renderSuspects(room);
-      renderEvidence(room);
-      renderChat(room);
-
-      if (changed) renderAccusation(room);
-      renderVerdict(room);
-    }
-
-    function renderSuspects(room) {
-      const list = $("suspectList");
-      const suspects = room.case?.suspects || [];
-      list.replaceChildren();
-
-      suspects.forEach(suspect => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "suspect" +
-          (selectedSuspectId === suspect.id ? " active" : "");
-
-        const name = document.createElement("div");
-        name.className = "suspect-name";
-        name.textContent = suspect.name;
-
-        const role = document.createElement("div");
-        role.className = "suspect-role";
-        role.textContent = suspect.role || "Seseorang yang terkait dengan kasus";
-
-        button.append(name, role);
-        button.addEventListener("click", () => {
-          selectedSuspectId = suspect.id;
-          $("selectedSuspect").textContent = suspect.name;
-          renderSuspects(room);
-          renderChat(room);
-        });
-
-        list.appendChild(button);
-      });
-    }
-
-    function renderChat(room) {
-      const log = $("chatLog");
-      log.replaceChildren();
-
-      const messages = (room.messages || []).filter(message =>
-        !message.suspectId || message.suspectId === selectedSuspectId
+  async function refreshRoom(silent = false) {
+    if (!state.roomCode || !state.playerId) return;
+    try {
+      const result = await api(
+        `/api/room?code=${encodeURIComponent(state.roomCode)}&playerId=${encodeURIComponent(state.playerId)}`
       );
-
-      if (!selectedSuspectId) {
-        const empty = document.createElement("div");
-        empty.className = "message system";
-        empty.textContent = "Pilih tersangka untuk memulai percakapan.";
-        log.appendChild(empty);
-        return;
-      }
-
-      const relevant = messages.filter(message =>
-        message.suspectId === selectedSuspectId
-      );
-
-      if (!relevant.length) {
-        const empty = document.createElement("div");
-        empty.className = "message system";
-        empty.textContent = "Belum ada percakapan dengan tersangka ini.";
-        log.appendChild(empty);
-        return;
-      }
-
-      relevant.forEach(message => {
-        const bubble = document.createElement("div");
-        bubble.className = "message " +
-          (message.playerId ? "player" :
-           message.type === "system" ? "system" : "suspect");
-
-        const label = message.playerId
-          ? (message.playerName || "Pemain")
-          : (message.type === "system" ? "Catatan" :
-             message.suspectName || "Tersangka");
-
-        bubble.textContent = label + "\n" + message.text;
-        log.appendChild(bubble);
-      });
-
-      log.scrollTop = log.scrollHeight;
+      state.room = result.room || result;
+      renderRoom();
+    } catch (error) {
+      if (!silent) toast(error.message);
     }
+  }
 
-    function renderEvidence(room) {
-      const list = $("evidenceList");
-      list.replaceChildren();
+  function renderRoom() {
+    const room = state.room;
+    if (!room) return;
 
-      const evidence = room.evidence || [];
+    const caseData = room.case || {};
+    $("roomCodeDisplay").textContent = room.code || state.roomCode;
 
-      if (!evidence.length) {
-        const empty = document.createElement("div");
-        empty.className = "empty";
-        empty.textContent = "Belum ada bukti. Interogasi tersangka untuk menemukan petunjuk.";
-        list.appendChild(empty);
-        return;
-      }
+    const players = room.players || [];
+    const playerCount = players.length;
+    $("playerStatus").textContent = playerCount >= 2
+      ? "2 detektif terhubung"
+      : "Menunggu teman bergabung...";
 
-      evidence.forEach(item => {
-        const card = document.createElement("div");
-        card.className = "evidence-item";
+    $("caseCategory").textContent =
+      categoryNames[caseData.category || room.category] || "KASUS MISTERI";
+    $("caseTitle").textContent = caseData.title || "Kasus baru";
+    $("caseDescription").textContent = caseData.description || caseData.intro || "";
 
-        const title = document.createElement("strong");
-        title.textContent = item.title || "Petunjuk";
+    const suspects = caseData.suspects || [];
+    $("suspectsList").replaceChildren();
+    $("accuseSelect").replaceChildren(new Option("Pilih tersangka...", ""));
 
-        const description = document.createElement("div");
-        description.textContent = item.description || item.text || "";
+    suspects.forEach(suspect => {
+      const id = suspect.id || suspect.name;
+      const card = document.createElement("div");
+      card.className = "suspect";
 
-        const source = document.createElement("small");
-        source.textContent = "Sumber: " + (item.source || "Hasil investigasi");
+      const top = document.createElement("div");
+      top.className = "suspect-top";
+      const name = document.createElement("h3");
+      name.textContent = suspect.name || "Tersangka";
+      const tag = document.createElement("span");
+      tag.className = "tag";
+      tag.textContent = suspect.role || "Tersangka";
+      top.append(name, tag);
 
-        card.append(title, description, source);
-        list.appendChild(card);
-      });
-    }
+      const desc = document.createElement("p");
+      desc.textContent = suspect.description || suspect.alibi || "Belum ada informasi.";
 
-    function renderAccusation(room) {
-      const select = $("accuseSelect");
-      const previousValue = select.value;
-      select.replaceChildren();
-
-      const placeholder = document.createElement("option");
-      placeholder.value = "";
-      placeholder.textContent = "Pilih tersangka...";
-      select.appendChild(placeholder);
-
-      (room.case?.suspects || []).forEach(suspect => {
-        const option = document.createElement("option");
-        option.value = suspect.id;
-        option.textContent = suspect.name;
-        select.appendChild(option);
-      });
-
-      if (previousValue &&
-          (room.case?.suspects || []).some(s => s.id === previousValue)) {
-        select.value = previousValue;
-      }
-
-      const accusations = room.accusations || {};
-      const mine = accusations[playerId];
-      if (mine && mine.suspectId) {
-        select.value = mine.suspectId;
-        $("reasonInput").value = mine.reason || "";
-      }
-    }
-
-    function renderVerdict(room) {
-      const box = $("verdictBox");
-      const newCaseBtn = $("newCaseBtn");
-
-      if (!room.verdict) {
-        box.classList.add("hidden");
-        box.replaceChildren();
-        newCaseBtn.classList.add("hidden");
-        return;
-      }
-
-      box.classList.remove("hidden");
-      box.replaceChildren();
-
-      const heading = document.createElement("h2");
-      heading.textContent = room.verdict.correct ? "Misteri Terpecahkan" : "Kesimpulan Akhir";
-
-      const result = document.createElement("p");
-      result.textContent = room.verdict.correct
-        ? "Tuduhan akhir berhasil mengungkap pelaku."
-        : "Tuduhan akhir tidak tepat. Kebenaran kasus tetap terungkap di bawah.";
-
-      const culprit = document.createElement("p");
-      culprit.textContent = "Pelaku sebenarnya: " + (room.verdict.culpritName || "Tidak diketahui");
-
-      const explanation = document.createElement("p");
-      explanation.textContent = room.verdict.explanation || "";
-
-      box.append(heading, result, culprit, explanation);
-      newCaseBtn.classList.remove("hidden");
-    }
-
-    async function sendQuestion(event) {
-      event.preventDefault();
-      if (isBusy) return;
-
-      if (!currentRoom || !selectedSuspectId) {
-        setStatus("talkStatus", "Pilih tersangka terlebih dahulu.", "error");
-        return;
-      }
-
-      const question = $("questionInput").value.trim();
-      if (!question) {
-        setStatus("talkStatus", "Tulis pertanyaan terlebih dahulu.", "error");
-        return;
-      }
-
-      setBusy(true);
-      setStatus("talkStatus", "Tersangka sedang menjawab...");
-      $("questionInput").disabled = true;
-
-      try {
-        const data = await api("/api/talk", {
-          method: "POST",
-          body: {
-            code: currentRoom.code,
-            playerId,
-            playerName,
-            suspectId: selectedSuspectId,
-            question
-          }
-        });
-
-        currentRoom = data.room;
-        $("questionInput").value = "";
-        renderRoom(currentRoom);
-        setStatus("talkStatus", "Jawaban berhasil diterima.", "success");
-      } catch (error) {
-        setStatus("talkStatus", error.message, "error");
-      } finally {
-        $("questionInput").disabled = false;
-        setBusy(false);
+      const interrogate = document.createElement("button");
+      interrogate.className = "btn ghost";
+      interrogate.style.marginTop = "10px";
+      interrogate.textContent = "Interogasi";
+      interrogate.addEventListener("click", () => {
+        $("questionInput").value = `Interogasi ${suspect.name}: `;
         $("questionInput").focus();
-      }
-    }
+      });
 
-    async function accuseSuspect() {
-      if (isBusy) return;
-
-      const suspectId = $("accuseSelect").value;
-      const reason = $("reasonInput").value.trim();
-
-      if (!suspectId) {
-        setStatus("accuseStatus", "Pilih tersangka yang ingin kamu tuduh.", "error");
-        return;
-      }
-
-      setBusy(true);
-      setStatus("accuseStatus", "Mencatat tuduhan...");
-
-      try {
-        const data = await api("/api/accuse", {
-          method: "POST",
-          body: {
-            code: currentRoom.code,
-            playerId,
-            suspectId,
-            reason
-          }
-        });
-
-        currentRoom = data.room;
-        renderRoom(currentRoom);
-        setStatus(
-          "accuseStatus",
-          data.message || "Tuduhan berhasil dicatat.",
-          "success"
-        );
-      } catch (error) {
-        setStatus("accuseStatus", error.message, "error");
-      } finally {
-        setBusy(false);
-      }
-    }
-
-    async function copyRoomCode() {
-      if (!currentRoom?.code) return;
-
-      try {
-        await navigator.clipboard.writeText(currentRoom.code);
-        $("copyCodeBtn").textContent = "Tersalin!";
-      } catch {
-        window.prompt("Salin kode room ini:", currentRoom.code);
-      }
-
-      setTimeout(() => {
-        $("copyCodeBtn").textContent = "Salin";
-      }, 1500);
-    }
-
-    $("createBtn").addEventListener("click", createRoom);
-    $("joinBtn").addEventListener("click", joinRoom);
-    $("talkForm").addEventListener("submit", sendQuestion);
-    $("accuseBtn").addEventListener("click", accuseSuspect);
-    $("copyCodeBtn").addEventListener("click", copyRoomCode);
-    $("backBtn").addEventListener("click", showSetup);
-
-    $("newCaseBtn").addEventListener("click", () => {
-      showSetup();
-      $("createName").value = playerName;
-      $("joinName").value = playerName;
+      card.append(top, desc, interrogate);
+      $("suspectsList").append(card);
+      $("accuseSelect").add(new Option(suspect.name, id));
     });
 
-    $("joinCode").addEventListener("input", event => {
-      event.target.value = event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+    $("evidenceList").replaceChildren();
+    (caseData.evidence || []).forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = typeof item === "string" ? item : (item.description || item.name || JSON.stringify(item));
+      $("evidenceList").append(li);
     });
-  </script>
+
+    renderMessages(room.messages || []);
+    const verdict = room.verdict;
+    if (verdict) {
+      $("verdictPanel").classList.remove("hidden");
+      $("accusationPanel").classList.add("hidden");
+      $("verdictContent").textContent =
+        verdict.explanation || verdict.summary || "Kasus telah selesai.";
+      if (verdict.culpritName) {
+        $("verdictContent").textContent =
+          `Pelaku: ${verdict.culpritName}\n\n${verdict.explanation || verdict.summary || ""}`;
+      }
+    } else {
+      $("verdictPanel").classList.add("hidden");
+      $("accusationPanel").classList.remove("hidden");
+      const accusations = room.accusations || [];
+      const mine = accusations.find(a => a.playerId === state.playerId);
+      $("accuseStatus").textContent = mine
+        ? "Tuduhanmu sudah dikirim. Menunggu detektif lainnya."
+        : `${accusations.length}/2 detektif telah mengirim tuduhan.`;
+      if (mine) {
+        $("accuseSelect").value = mine.suspectId || "";
+        $("accuseSelect").disabled = true;
+        $("accuseBtn").disabled = true;
+      } else {
+        $("accuseSelect").disabled = false;
+        $("accuseBtn").disabled = state.busy;
+      }
+    }
+    $("roomHint").textContent = playerCount < 2
+      ? "Bagikan kode ruang kepada temanmu untuk memulai penyelidikan bersama."
+      : "Bandingkan alibi, periksa bukti, dan sepakati siapa yang paling mencurigakan.";
+  }
+
+  function renderMessages(messages) {
+    const log = $("chatLog");
+    log.replaceChildren();
+    if (!messages.length) {
+      const empty = document.createElement("div");
+      empty.className = "muted";
+      empty.textContent = "Belum ada interogasi. Pilih tersangka dan ajukan pertanyaan.";
+      log.append(empty);
+      return;
+    }
+
+    messages.forEach(message => {
+      const item = document.createElement("div");
+      item.className = "message" +
+        (message.playerId === state.playerId ? " mine" : "");
+      const who = document.createElement("div");
+      who.className = "who";
+      who.textContent = message.suspectName
+        ? `${message.playerName || "Detektif"} · ${message.suspectName}`
+        : (message.playerName || message.suspectName || "Catatan kasus");
+      const body = document.createElement("div");
+      body.className = "body";
+      body.textContent = message.text || message.content || "";
+      item.append(who, body);
+      log.append(item);
+    });
+    log.scrollTop = log.scrollHeight;
+  }
+
+  async function sendQuestion() {
+    if (state.busy) return;
+    const text = $("questionInput").value.trim();
+    if (!text) return toast("Tulis pertanyaan terlebih dahulu.");
+    setBusy(true);
+    try {
+      await api("/api/talk", {
+        roomCode: state.roomCode,
+        playerId: state.playerId,
+        text
+      });
+      $("questionInput").value = "";
+      await refreshRoom();
+    } catch (error) {
+      toast(error.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function sendAccusation() {
+    if (state.busy) return;
+    const suspectId = $("accuseSelect").value;
+    if (!suspectId) return toast("Pilih tersangka terlebih dahulu.");
+    setBusy(true);
+    try {
+      await api("/api/accuse", {
+        roomCode: state.roomCode,
+        playerId: state.playerId,
+        suspectId
+      });
+      await refreshRoom();
+      toast("Tuduhan berhasil dikirim.");
+    } catch (error) {
+      toast(error.message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  $("createBtn").addEventListener("click", createRoom);
+  $("joinBtn").addEventListener("click", joinRoom);
+  $("sendBtn").addEventListener("click", sendQuestion);
+  $("questionInput").addEventListener("keydown", e => {
+    if (e.key === "Enter") sendQuestion();
+  });
+  $("accuseBtn").addEventListener("click", sendAccusation);
+  $("leaveBtn").addEventListener("click", showSetup);
+  $("newCaseBtn").addEventListener("click", () => {
+    const previousName = state.playerName || $("playerName").value;
+    showSetup();
+    $("playerName").value = previousName;
+    toast("Pilih kategori dan buat ruang baru untuk memulai kasus berikutnya.");
+  });
+
+  api("/api/health").then(() => {
+    $("connectionStatus").textContent = "SERVER ONLINE";
+  }).catch(() => {
+    $("connectionStatus").textContent = "MYSTERY ROOM";
+  });
+</script>
 </body>
 </html>
