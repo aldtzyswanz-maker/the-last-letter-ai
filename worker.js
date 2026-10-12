@@ -21,13 +21,20 @@ const HEADERS = {
 };
 
 function json(data, status = 200) {
-  return new Response(JSON.stringify(data), { status, headers: HEADERS });
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: HEADERS
+  });
 }
 
 function makeId(length = 6) {
   const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
   let result = "";
-  for (let i = 0; i < length; i++) result += chars[Math.floor(Math.random() * chars.length)];
+
+  for (let i = 0; i < length; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+
   return result;
 }
 
@@ -35,145 +42,366 @@ function cleanName(value) {
   return String(value || "").trim().slice(0, 24);
 }
 
+function pick(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function shuffle(items) {
+  const result = [...items];
+
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+
+  return result;
+}
+
+/*
+ * Kasus cadangan ketika AI gagal.
+ * Nama, peran, judul, dan susunan tersangka divariasikan.
+ * Petunjuk utama secara eksplisit berkaitan dengan pelaku.
+ */
 function fallbackCase(category) {
   const chosen = CATEGORIES[category] ? category : "theft";
-  const suspects = [
-    { id: "s1", name: "Raka Pradipta", role: "Manajer", description: "Mengelola lokasi kejadian dan mengaku pulang lebih awal." },
-    { id: "s2", name: "Nadia Putri", role: "Pegawai", description: "Pegawai lama yang mengetahui rutinitas orang-orang di lokasi." },
-    { id: "s3", name: "Dimas Arya", role: "Pengunjung", description: "Mengaku berada dekat lokasi, tetapi keterangannya berubah." },
-    { id: "s4", name: "Sinta Maharani", role: "Saksi", description: "Orang terakhir yang mengaku melihat kejadian." }
+
+  const people = [
+    ["Adrian Mahesa", "Arsiparis"],
+    ["Keisya Anindita", "Jurnalis"],
+    ["Bima Prakoso", "Teknisi"],
+    ["Nadine Larasati", "Kurator"],
+    ["Rafi Dirgantara", "Akuntan"],
+    ["Maya Puspitasari", "Fotografer"],
+    ["Daffa Wicaksana", "Petugas keamanan"],
+    ["Intan Permata", "Asisten pribadi"],
+    ["Farel Ramadhan", "Pengelola gedung"],
+    ["Celine Adelia", "Peneliti"],
+    ["Rangga Pratama", "Kurir"],
+    ["Vania Oktaviani", "Sekretaris"],
+    ["Gilang Saputra", "Mekanik"],
+    ["Aurel Maharani", "Manajer acara"],
+    ["Reza Firmansyah", "Analis keuangan"],
+    ["Shania Putri", "Resepsionis"],
+    ["Naufal Akbar", "Pengacara"],
+    ["Tiara Kusuma", "Dokumentator"],
+    ["Farhan Maulana", "Petugas laboratorium"],
+    ["Zahra Amalia", "Pemilik usaha"],
+    ["Dion Kurniawan", "Staf operasional"],
+    ["Livia Maharani", "Konsultan"],
+    ["Arkan Pradipta", "Pengelola koleksi"],
+    ["Nisa Rahmadani", "Koordinator"]
   ];
 
-  const cases = {
+  const selectedPeople = shuffle(people).slice(0, 4);
+  const culpritIndex = Math.floor(Math.random() * 4);
+  const culpritId = `s${culpritIndex + 1}`;
+  const culprit = selectedPeople[culpritIndex];
+
+  const storyTemplates = {
     murder: {
-      title: "Malam Terakhir di Rumah Arunika",
-      description: "Pemilik galeri ditemukan meninggal di ruang kerjanya. Tidak ada kerusakan pada pintu, sementara empat orang memberikan alibi yang belum sepenuhnya cocok.",
-      evidence: ["Jam dinding berhenti pada pukul 21.15.", "Ada gelas minuman di meja kerja.", "Sebuah catatan menunjukkan janji pertemuan malam itu."],
-      culpritId: "s2",
-      explanation: "Nadia menyembunyikan waktu kedatangannya. Catatan pertemuan dan keterangannya yang berubah menunjukkan bahwa ia memiliki kesempatan yang tidak ia akui."
+      titles: [
+        "Rahasia di Balik Pintu Terkunci",
+        "Malam Sunyi di Gedung Arunika",
+        "Jam Terakhir Sang Kolektor",
+        "Bayangan di Ruang Kerja"
+      ],
+      description:
+        "Seorang kolektor ditemukan meninggal di ruang kerjanya. Tidak ada kerusakan pada pintu. Empat orang berada di gedung malam itu, tetapi catatan waktu dan keterangan mereka tidak sepenuhnya cocok.",
+      object: "catatan akses ruang kerja",
+      clue: `Catatan akses menunjukkan bahwa kartu milik ${culprit[0]} digunakan di ruang kerja pada waktu kejadian, bertentangan dengan alibinya.`,
+      explanation: `${culprit[0]} adalah pelaku. Catatan akses menempatkannya di ruang kerja saat kejadian, sedangkan alibinya menyatakan bahwa ia berada di tempat lain.`
     },
     robbery: {
-      title: "Perampokan di Galeri Arunika",
-      description: "Sebuah koleksi bernilai tinggi lenyap dari galeri terkunci. Alarm sempat mati selama beberapa menit dan hanya empat orang diketahui berada di sekitar gedung.",
-      evidence: ["Alarm berhenti mencatat aktivitas selama tujuh menit.", "Jejak sepatu ditemukan di lorong servis.", "Kunci cadangan tidak berada di tempat penyimpanan."],
-      culpritId: "s1",
-      explanation: "Raka mengetahui sistem keamanan dan waktu pergantian penjaga. Alibinya tidak cocok dengan catatan alarm."
+      titles: [
+        "Perampokan di Galeri Senja",
+        "Koleksi yang Menghilang",
+        "Tujuh Menit Tanpa Alarm",
+        "Pencurian di Ruang Pamer"
+      ],
+      description:
+        "Sebuah koleksi berharga hilang dari ruangan terkunci. Alarm sempat terputus dan empat orang yang berada di sekitar gedung memberikan keterangan berbeda.",
+      object: "catatan sistem keamanan",
+      clue: `Log keamanan mencatat penggunaan kode akses milik ${culprit[0]} ketika alarm dinonaktifkan, meskipun ia mengaku tidak berada di gedung.`,
+      explanation: `${culprit[0]} adalah pelaku. Log keamanan menghubungkan kode aksesnya dengan waktu alarm dinonaktifkan, bertentangan dengan alibinya.`
     },
     kidnapping: {
-      title: "Pesan dari Kamar Kosong",
-      description: "Seorang mahasiswa menghilang setelah menerima pesan misterius. Barang-barangnya tertinggal, sementara empat orang terakhir memberikan keterangan berbeda.",
-      evidence: ["Ponsel korban menerima pesan pukul 20.40.", "Kamera merekam kendaraan yang tidak dikenal.", "Satu halaman dari buku catatan korban hilang."],
-      culpritId: "s3",
-      explanation: "Dimas mengetahui isi pesan yang seharusnya hanya diketahui orang dekat korban. Keterangannya tentang waktu juga berubah."
+      titles: [
+        "Pesan Terakhir dari Kamar Kosong",
+        "Jejak di Jalan Berkabut",
+        "Hilang Sebelum Tengah Malam",
+        "Telepon yang Tidak Terjawab"
+      ],
+      description:
+        "Seseorang menghilang setelah menerima pesan misterius. Ponselnya tertinggal dan empat orang terakhir yang berhubungan dengannya memberikan keterangan berbeda.",
+      object: "rekaman pesan dan waktu pertemuan",
+      clue: `${culprit[0]} mengetahui detail waktu pertemuan rahasia yang tidak diumumkan kepada orang lain. Catatan waktu juga bertentangan dengan keterangannya.`,
+      explanation: `${culprit[0]} terlibat dalam penculikan. Informasi tentang pertemuan rahasia dan ketidaksesuaian waktu keterangannya menghubungkannya dengan kejadian tersebut.`
     },
     fraud: {
-      title: "Laporan yang Tidak Seimbang",
-      description: "Dana sebuah yayasan tidak sesuai dengan laporan keuangan. Empat orang memiliki akses ke dokumen, tetapi masing-masing memberikan penjelasan berbeda.",
-      evidence: ["Ada dua versi laporan dengan angka berbeda.", "Sebuah transaksi tidak memiliki bukti pendukung.", "Dokumen revisi dibuat setelah jam kerja."],
-      culpritId: "s1",
-      explanation: "Raka memiliki akses untuk mengubah laporan. Waktu revisi dokumen bertentangan dengan keterangannya."
+      titles: [
+        "Angka yang Tidak Pernah Cocok",
+        "Laporan Keuangan Ganda",
+        "Transaksi di Balik Layar",
+        "Rahasia Buku Kas"
+      ],
+      description:
+        "Dana sebuah organisasi tidak sesuai dengan laporan. Sejumlah dokumen direvisi setelah jam kerja dan empat orang memiliki akses ke berkas keuangan.",
+      object: "riwayat revisi dokumen",
+      clue: `Riwayat dokumen menunjukkan perubahan yang dilakukan melalui akun ${culprit[0]} setelah jam kerja, meskipun ia menyangkal mengakses laporan tersebut.`,
+      explanation: `${culprit[0]} melakukan kecurangan. Riwayat revisi menghubungkan akunnya dengan perubahan laporan yang tidak dapat dijelaskan oleh alibinya.`
     },
     missing: {
-      title: "Jejak yang Terputus",
-      description: "Seorang fotografer tidak pulang setelah perjalanan terakhirnya. Kamera ditemukan di sebuah penginapan, dengan empat orang terkait perjalanan tersebut.",
-      evidence: ["Kamera korban menyimpan satu foto yang belum dikirim.", "Tiket perjalanan memiliki perubahan waktu.", "Buku tamu mencatat nama yang berbeda."],
-      culpritId: "s4",
-      explanation: "Sinta mengetahui lokasi terakhir korban tetapi tidak mengungkapkannya sejak awal. Keterangan buku tamu menunjukkan bahwa ia berada di sana."
+      titles: [
+        "Foto Terakhir Sebelum Menghilang",
+        "Perjalanan yang Terputus",
+        "Jejak di Penginapan Lama",
+        "Catatan dari Tempat Sunyi"
+      ],
+      description:
+        "Seorang fotografer tidak kembali dari perjalanan terakhirnya. Kamera ditemukan di penginapan dan catatan perjalanan menunjukkan perubahan rencana yang belum terjelaskan.",
+      object: "catatan perjalanan",
+      clue: `Catatan perjalanan menghubungkan ${culprit[0]} dengan lokasi terakhir korban pada waktu yang bertentangan dengan keterangannya.`,
+      explanation: `${culprit[0]} menyembunyikan keterlibatannya dalam hilangnya korban. Catatan perjalanan menempatkannya di lokasi terakhir korban, tidak sesuai dengan alibinya.`
     },
     theft: {
-      title: "Arsip yang Menghilang",
-      description: "Sebuah dokumen penting hilang dari kantor tertutup. Tidak ada kerusakan pada pintu, dan empat orang memiliki alasan untuk mengakses ruangan.",
-      evidence: ["Kartu akses digunakan setelah jam kantor.", "Laci arsip ditemukan terbuka.", "Catatan penjaga menunjukkan pergantian jadwal yang tidak biasa."],
-      culpritId: "s3",
-      explanation: "Dimas mengaku sudah pergi sebelum kartu akses digunakan. Catatan waktu membantah alibinya."
+      titles: [
+        "Arsip yang Menghilang",
+        "Kunci di Ruang Kosong",
+        "Pencurian Setelah Jam Kerja",
+        "Dokumen dari Laci Ketiga"
+      ],
+      description:
+        "Sebuah dokumen penting hilang dari ruangan terkunci. Tidak ada kerusakan pada pintu dan empat orang memiliki akses ke area tersebut.",
+      object: "catatan kartu akses",
+      clue: `Catatan kartu akses menunjukkan bahwa kartu milik ${culprit[0]} membuka ruangan setelah jam kerja, bertentangan dengan pengakuannya.`,
+      explanation: `${culprit[0]} mencuri dokumen tersebut. Catatan akses menghubungkan kartunya dengan ruangan saat dokumen menghilang, sementara alibinya tidak cocok.`
     },
     blackmail: {
-      title: "Surat Tanpa Nama",
-      description: "Seseorang mengirim surat ancaman untuk membuka rahasia sebuah keluarga. Empat orang memiliki informasi yang bisa digunakan untuk menekan mereka.",
-      evidence: ["Surat dibuat menggunakan mesin cetak kantor.", "Amplop tidak memiliki alamat pengirim.", "Sebuah foto lama diselipkan bersama surat."],
-      culpritId: "s2",
-      explanation: "Nadia memiliki akses ke mesin cetak dan mengetahui detail foto yang tidak pernah diumumkan."
+      titles: [
+        "Surat Tanpa Nama",
+        "Rahasia di Dalam Amplop",
+        "Foto yang Tidak Boleh Terungkap",
+        "Ancaman dari Balik Pintu"
+      ],
+      description:
+        "Sebuah surat ancaman diterima oleh sebuah keluarga. Surat itu berisi informasi pribadi dan foto lama. Empat orang memiliki akses ke informasi tersebut.",
+      object: "riwayat pencetakan surat",
+      clue: `Riwayat pencetakan menghubungkan surat itu dengan akun ${culprit[0]}, meskipun ia menyangkal pernah mencetaknya.`,
+      explanation: `${culprit[0]} mengirim surat ancaman. Riwayat pencetakan menghubungkan akun miliknya dengan surat tersebut, bertentangan dengan keterangannya.`
     }
   };
 
-  return { category: chosen, ...cases[chosen], suspects };
+  const template = storyTemplates[chosen];
+  const title = pick(template.titles);
+
+  const suspects = selectedPeople.map((person, index) => {
+    const id = `s${index + 1}`;
+
+    return {
+      id,
+      name: person[0],
+      role: person[1],
+      description:
+        id === culpritId
+          ? `Mengaku tidak terlibat. ${person[1]} yang memiliki akses atau informasi terkait kejadian.`
+          : `Mengaku tidak terlibat dan menyatakan tidak mengetahui detail penting kejadian.`
+    };
+  });
+
+  return {
+    category: chosen,
+    title,
+    description: template.description,
+    suspects,
+    evidence: [
+      template.clue,
+      `Catatan ${template.object} perlu dicocokkan dengan waktu yang disebutkan para saksi.`,
+      "Keterangan waktu dari setidaknya dua orang tidak sepenuhnya cocok."
+    ],
+    culpritId,
+    explanation: template.explanation
+  };
+}
+
+function extractJson(raw) {
+  const text = String(raw || "")
+    .replace(/```json/gi, "")
+    .replace(/```/g, "")
+    .trim();
+
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+
+  if (start < 0 || end <= start) {
+    throw new Error("Respons AI tidak berisi objek JSON.");
+  }
+
+  return JSON.parse(text.slice(start, end + 1));
+}
+
+function validateCase(data) {
+  const ids = ["s1", "s2", "s3", "s4"];
+
+  if (
+    !data ||
+    typeof data.title !== "string" ||
+    !data.title.trim() ||
+    typeof data.description !== "string" ||
+    !data.description.trim() ||
+    !Array.isArray(data.suspects) ||
+    data.suspects.length !== 4 ||
+    !Array.isArray(data.evidence) ||
+    data.evidence.length < 3 ||
+    !ids.includes(data.culpritId) ||
+    typeof data.explanation !== "string" ||
+    !data.explanation.trim()
+  ) {
+    throw new Error("Struktur kasus tidak valid.");
+  }
+
+  const suspects = data.suspects.map(s => ({
+    id: String(s?.id || ""),
+    name: String(s?.name || "").trim(),
+    role: String(s?.role || "").trim(),
+    description: String(s?.description || "").trim()
+  }));
+
+  if (suspects.some(s =>
+    !ids.includes(s.id) ||
+    !s.name ||
+    !s.role ||
+    !s.description
+  )) {
+    throw new Error("Data tersangka tidak lengkap.");
+  }
+
+  if (new Set(suspects.map(s => s.id)).size !== 4) {
+    throw new Error("ID tersangka duplikat.");
+  }
+
+  if (new Set(suspects.map(s => s.name.toLowerCase())).size !== 4) {
+    throw new Error("Nama tersangka duplikat.");
+  }
+
+  if (!suspects.some(s => s.id === data.culpritId)) {
+    throw new Error("Pelaku tidak ditemukan dalam daftar.");
+  }
+
+  const byId = Object.fromEntries(suspects.map(s => [s.id, s]));
+
+  const evidence = data.evidence
+    .filter(x => typeof x === "string" && x.trim())
+    .slice(0, 5)
+    .map(x => x.trim().slice(0, 500));
+
+  if (evidence.length < 3) {
+    throw new Error("Barang bukti kurang dari tiga.");
+  }
+
+  return {
+    title: data.title.trim().slice(0, 160),
+    description: data.description.trim().slice(0, 1000),
+    suspects: ids.map(id => ({
+      id,
+      name: byId[id].name.slice(0, 80),
+      role: byId[id].role.slice(0, 50),
+      description: byId[id].description.slice(0, 500)
+    })),
+    evidence,
+    culpritId: data.culpritId,
+    explanation: data.explanation.trim().slice(0, 2000)
+  };
 }
 
 async function generateCase(env, requestedCategory) {
   const keys = Object.keys(CATEGORIES);
   const category = CATEGORIES[requestedCategory]
     ? requestedCategory
-    : keys[Math.floor(Math.random() * keys.length)];
+    : pick(keys);
+
+  const caseSeed = crypto.randomUUID();
 
   try {
     const result = await env.AI.run(MODEL, {
       messages: [
         {
           role: "system",
-          content: "Kamu penulis kasus misteri detektif berbahasa Indonesia. Keluarkan JSON valid saja."
+          content: `Kamu penulis misteri detektif profesional berbahasa Indonesia.
+Keluarkan satu objek JSON valid tanpa markdown.
+Buat misteri orisinal yang bisa dipecahkan secara logis.
+Pastikan petunjuk, alibi, pelaku, dan solusi konsisten.`
         },
         {
           role: "user",
-          content: `Buat kasus fiksi kategori ${CATEGORIES[category]}.
-Buat kasus yang bisa dipecahkan dengan menalar bukti dan alibi. Tanpa detail grafis.
-Tepat 4 tersangka dengan ID s1, s2, s3, s4. Tepat satu pelaku.
-Buat 3-5 barang bukti. Jangan membocorkan pelaku dalam deskripsi, alibi, atau bukti.
-Jawaban wajib berupa JSON tanpa markdown dengan struktur:
+          content: `Buat kasus kategori "${CATEGORIES[category]}".
+
+Kode variasi cerita: ${caseSeed}
+
+Aturan:
+- Buat judul dan alur yang spesifik serta berbeda.
+- Tepat empat tersangka dengan ID s1, s2, s3, s4.
+- Empat nama lengkap dan peran yang berbeda.
+- Tepat satu pelaku.
+- Buat 3-5 bukti yang benar-benar relevan.
+- Setidaknya dua bukti harus membantu membedakan pelaku dari tersangka lain.
+- Alibi setiap tersangka harus spesifik.
+- Penjelasan akhir harus membuktikan keterlibatan pelaku menggunakan bukti yang tersedia.
+- Jangan membuat bukti yang menyatakan pelaku secara langsung dalam deskripsi awal.
+- Jangan gunakan detail grafis.
+- Jangan menyalin judul atau cerita generik yang biasa digunakan.
+
+Struktur wajib:
 {
-"title":"judul kasus",
-"description":"ringkasan tanpa mengungkap pelaku",
-"suspects":[
-{"id":"s1","name":"nama","role":"peran","description":"alibi atau informasi awal"},
-{"id":"s2","name":"nama","role":"peran","description":"alibi atau informasi awal"},
-{"id":"s3","name":"nama","role":"peran","description":"alibi atau informasi awal"},
-{"id":"s4","name":"nama","role":"peran","description":"alibi atau informasi awal"}
-],
-"evidence":["bukti 1","bukti 2","bukti 3"],
-"culpritId":"s1",
-"explanation":"penjelasan solusi yang menghubungkan bukti dengan pelaku"
+  "title": "judul",
+  "description": "ringkasan tanpa membocorkan pelaku",
+  "suspects": [
+    {"id":"s1","name":"nama","role":"peran","description":"alibi"},
+    {"id":"s2","name":"nama","role":"peran","description":"alibi"},
+    {"id":"s3","name":"nama","role":"peran","description":"alibi"},
+    {"id":"s4","name":"nama","role":"peran","description":"alibi"}
+  ],
+  "evidence": ["bukti 1","bukti 2","bukti 3"],
+  "culpritId": "s1",
+  "explanation": "solusi logis"
 }`
         }
       ],
       max_tokens: 1800,
-      temperature: 0.75
+      temperature: 0.9
     });
 
     const raw = String(result.response || result.output_text || "");
-    const start = raw.indexOf("{");
-    const end = raw.lastIndexOf("}");
-    if (start < 0 || end <= start) throw new Error("AI tidak menghasilkan JSON");
 
-    const data = JSON.parse(raw.slice(start, end + 1));
-    const ids = ["s1", "s2", "s3", "s4"];
-    if (!data.title || !data.description ||
-        !Array.isArray(data.suspects) || data.suspects.length !== 4 ||
-        !Array.isArray(data.evidence) || !ids.includes(data.culpritId) ||
-        !data.suspects.some(s => s.id === data.culpritId)) {
-      throw new Error("Struktur kasus tidak valid");
-    }
+    console.log("CASE AI RAW RESPONSE:", raw);
 
-    data.category = category;
-    data.suspects = data.suspects.map((s, i) => ({
-      id: ids[i],
-      name: String(s.name || `Tersangka ${i + 1}`).slice(0, 80),
-      role: String(s.role || "Tersangka").slice(0, 50),
-      description: String(s.description || "Belum memberikan keterangan.").slice(0, 500)
-    }));
-    data.evidence = data.evidence.slice(0, 5).map(x => String(x).slice(0, 500));
-    data.explanation = String(data.explanation || "Petunjuk dan alibi mengungkap pelaku.");
-    return data;
+    const parsed = extractJson(raw);
+    const validated = validateCase(parsed);
+
+    console.log("CASE GENERATION SUCCESS:", {
+      category,
+      title: validated.title,
+      suspectNames: validated.suspects.map(s => s.name)
+    });
+
+    return { category, ...validated };
   } catch (error) {
-    console.error("Case generation:", error.message);
+    console.error("CASE GENERATION FAILED:", {
+      category,
+      message: error?.message || String(error)
+    });
+
     return fallbackCase(category);
   }
 }
 
 function publicRoom(room) {
   const copy = structuredClone(room);
+
   if (!copy.verdict) {
     delete copy.case.culpritId;
     delete copy.case.explanation;
   }
+
   return copy;
 }
 
@@ -183,24 +411,35 @@ async function loadRoom(env, code) {
 }
 
 async function saveRoom(env, room) {
-  await env.ROOMS.put(`room:${room.code}`, JSON.stringify(room), {
-    expirationTtl: ROOM_TTL
-  });
+  await env.ROOMS.put(
+    `room:${room.code}`,
+    JSON.stringify(room),
+    { expirationTtl: ROOM_TTL }
+  );
 }
 
 async function createRoom(env, body) {
   const name = cleanName(body.name);
-  if (!name) return json({ error: "Nama detektif wajib diisi." }, 400);
 
-  const category = CATEGORIES[body.category] ? body.category : "random";
+  if (!name) {
+    return json({ error: "Nama detektif wajib diisi." }, 400);
+  }
+
+  const category = CATEGORIES[body.category]
+    ? body.category
+    : "random";
+
   let code;
+
   for (let i = 0; i < 8; i++) {
     code = makeId();
+
     if (!(await env.ROOMS.get(`room:${code}`))) break;
   }
 
   const caseData = await generateCase(env, category);
   const playerId = crypto.randomUUID();
+
   const room = {
     code,
     category: caseData.category,
@@ -214,23 +453,46 @@ async function createRoom(env, body) {
   };
 
   await saveRoom(env, room);
-  return json({ roomCode: code, playerId, room: publicRoom(room) });
+
+  return json({
+    roomCode: code,
+    playerId,
+    room: publicRoom(room)
+  });
 }
 
 async function joinRoom(env, body) {
   const name = cleanName(body.name);
   const code = String(body.roomCode || "").trim().toUpperCase();
-  if (!name || !code) return json({ error: "Nama dan kode ruang wajib diisi." }, 400);
+
+  if (!name || !code) {
+    return json({ error: "Nama dan kode ruang wajib diisi." }, 400);
+  }
 
   const room = await loadRoom(env, code);
-  if (!room) return json({ error: "Ruang tidak ditemukan atau sudah kedaluwarsa." }, 404);
-  if (room.verdict) return json({ error: "Kasus ini sudah selesai." }, 400);
-  if (room.players.length >= 2) return json({ error: "Ruang sudah penuh." }, 400);
+
+  if (!room) {
+    return json({ error: "Ruang tidak ditemukan atau sudah kedaluwarsa." }, 404);
+  }
+
+  if (room.verdict) {
+    return json({ error: "Kasus ini sudah selesai." }, 400);
+  }
+
+  if (room.players.length >= 2) {
+    return json({ error: "Ruang sudah penuh." }, 400);
+  }
 
   const playerId = crypto.randomUUID();
   room.players.push({ id: playerId, name });
+
   await saveRoom(env, room);
-  return json({ roomCode: code, playerId, room: publicRoom(room) });
+
+  return json({
+    roomCode: code,
+    playerId,
+    room: publicRoom(room)
+  });
 }
 
 async function getRoom(request, env) {
@@ -239,10 +501,14 @@ async function getRoom(request, env) {
   const playerId = url.searchParams.get("playerId");
   const room = await loadRoom(env, code);
 
-  if (!room) return json({ error: "Ruang tidak ditemukan." }, 404);
+  if (!room) {
+    return json({ error: "Ruang tidak ditemukan." }, 404);
+  }
+
   if (!room.players.some(p => p.id === playerId)) {
     return json({ error: "Kamu bukan anggota ruang ini." }, 403);
   }
+
   return json({ room: publicRoom(room) });
 }
 
@@ -252,18 +518,34 @@ async function talk(env, body) {
   const suspectId = String(body.suspectId || "");
   const text = String(body.text || "").trim().slice(0, 500);
 
-  if (!text) return json({ error: "Pertanyaan tidak boleh kosong." }, 400);
+  if (!text) {
+    return json({ error: "Pertanyaan tidak boleh kosong." }, 400);
+  }
 
   const room = await loadRoom(env, code);
+
   if (!room) return json({ error: "Ruang tidak ditemukan." }, 404);
-  if (!room.players.some(p => p.id === playerId)) return json({ error: "Akses ditolak." }, 403);
-  if (room.verdict) return json({ error: "Kasus sudah selesai." }, 400);
-  if (room.turns >= MAX_TURNS) return json({ error: "Batas interogasi tercapai." }, 400);
+
+  if (!room.players.some(p => p.id === playerId)) {
+    return json({ error: "Akses ditolak." }, 403);
+  }
+
+  if (room.verdict) {
+    return json({ error: "Kasus sudah selesai." }, 400);
+  }
+
+  if (room.turns >= MAX_TURNS) {
+    return json({ error: "Batas interogasi tercapai." }, 400);
+  }
 
   const suspect = room.case.suspects.find(s => s.id === suspectId);
-  if (!suspect) return json({ error: "Tersangka tidak valid." }, 400);
+
+  if (!suspect) {
+    return json({ error: "Tersangka tidak valid." }, 400);
+  }
 
   const player = room.players.find(p => p.id === playerId);
+
   const history = room.messages
     .filter(m => m.suspectId === suspectId)
     .slice(-12)
@@ -281,22 +563,28 @@ async function talk(env, body) {
     text,
     at: Date.now()
   });
+
   room.turns++;
 
-  let answer = "Aku perlu memikirkan kembali kejadian itu. Aku tidak ingat semuanya dengan jelas.";
+  let answer =
+    "Aku perlu memikirkan kembali kejadian itu. Aku tidak ingat semuanya dengan jelas.";
+
   try {
     const result = await env.AI.run(MODEL, {
       messages: [
         {
           role: "system",
           content: `Kamu memerankan tersangka fiksi bernama ${suspect.name}.
-Peran: ${suspect.role}. Keterangan awal dan alibi: ${suspect.description}
-Kasus: ${room.case.title}. Ringkasan: ${room.case.description}
+Peran: ${suspect.role}.
+Keterangan dan alibi: ${suspect.description}
+Kasus: ${room.case.title}.
+Ringkasan: ${room.case.description}
 Bukti publik: ${room.case.evidence.join("; ")}
-Jawab pertanyaan detektif dalam bahasa Indonesia, 1-3 kalimat.
-Pertahankan karakter dan alibi secara konsisten. Jangan mengarang fakta yang bertentangan dengan informasi kasus.
-Jangan mengungkap solusi atau mengaku sebagai pelaku tanpa alasan dalam cerita.
-Jangan berpura-pura memiliki informasi yang tidak diketahui karakter.`
+Jawab dalam bahasa Indonesia, 1-3 kalimat.
+Pertahankan alibi dan karakter secara konsisten.
+Jangan mengarang fakta yang bertentangan dengan informasi kasus.
+Jangan membocorkan solusi atau mengaku sebagai pelaku tanpa alasan cerita.
+Jangan mengaku mengetahui informasi yang tidak diketahui karaktermu.`
         },
         ...history,
         { role: "user", content: text }
@@ -304,9 +592,12 @@ Jangan berpura-pura memiliki informasi yang tidak diketahui karakter.`
       max_tokens: 180,
       temperature: 0.65
     });
-    answer = String(result.response || result.output_text || answer).trim().slice(0, 1000);
+
+    answer = String(
+      result.response || result.output_text || answer
+    ).trim().slice(0, 1000);
   } catch (error) {
-    console.error("Interrogation:", error.message);
+    console.error("INTERROGATION FAILED:", error?.message || error);
   }
 
   room.messages.push({
@@ -320,6 +611,7 @@ Jangan berpura-pura memiliki informasi yang tidak diketahui karakter.`
   });
 
   await saveRoom(env, room);
+
   return json({ ok: true, answer });
 }
 
@@ -327,19 +619,36 @@ async function accuse(env, body) {
   const code = String(body.roomCode || "").toUpperCase();
   const playerId = String(body.playerId || "");
   const suspectId = String(body.suspectId || "");
+
   const room = await loadRoom(env, code);
 
   if (!room) return json({ error: "Ruang tidak ditemukan." }, 404);
-  if (!room.players.some(p => p.id === playerId)) return json({ error: "Akses ditolak." }, 403);
-  if (room.verdict) return json({ error: "Kasus sudah selesai." }, 400);
-  if (room.players.length < 2) return json({ error: "Tunggu temanmu bergabung sebelum menuduh." }, 400);
-  if (!room.case.suspects.some(s => s.id === suspectId)) return json({ error: "Tersangka tidak valid." }, 400);
+
+  if (!room.players.some(p => p.id === playerId)) {
+    return json({ error: "Akses ditolak." }, 403);
+  }
+
+  if (room.verdict) {
+    return json({ error: "Kasus sudah selesai." }, 400);
+  }
+
+  if (room.players.length < 2) {
+    return json({
+      error: "Tunggu temanmu bergabung sebelum menuduh."
+    }, 400);
+  }
+
+  if (!room.case.suspects.some(s => s.id === suspectId)) {
+    return json({ error: "Tersangka tidak valid." }, 400);
+  }
+
   if (room.accusations.some(a => a.playerId === playerId)) {
     return json({ error: "Kamu sudah mengirim tuduhan." }, 400);
   }
 
   const player = room.players.find(p => p.id === playerId);
   const suspect = room.case.suspects.find(s => s.id === suspectId);
+
   room.accusations.push({
     playerId,
     playerName: player.name,
@@ -349,12 +658,17 @@ async function accuse(env, body) {
   });
 
   if (room.accusations.length === 2) {
-    const culprit = room.case.suspects.find(s => s.id === room.case.culpritId);
+    const culprit = room.case.suspects.find(
+      s => s.id === room.case.culpritId
+    );
+
     room.verdict = {
       culpritId: room.case.culpritId,
       culpritName: culprit?.name || "Tidak diketahui",
       explanation: room.case.explanation,
-      allCorrect: room.accusations.every(a => a.suspectId === room.case.culpritId),
+      allCorrect: room.accusations.every(
+        a => a.suspectId === room.case.culpritId
+      ),
       accusations: room.accusations.map(a => ({
         playerName: a.playerName,
         suspectName: a.suspectName,
@@ -364,32 +678,77 @@ async function accuse(env, body) {
   }
 
   await saveRoom(env, room);
-  return json({ ok: true, room: publicRoom(room) });
+
+  return json({
+    ok: true,
+    room: publicRoom(room)
+  });
 }
 
 export default {
   async fetch(request, env) {
-    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: HEADERS });
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: HEADERS
+      });
+    }
+
     const url = new URL(request.url);
 
     try {
-      if (url.pathname === "/api/health" && request.method === "GET") {
-        return json({ ok: true, service: "THE LAST LETTER" });
+      if (
+        url.pathname === "/api/health" &&
+        request.method === "GET"
+      ) {
+        return json({
+          ok: true,
+          service: "THE LAST LETTER"
+        });
       }
-      if (url.pathname === "/api/room" && request.method === "GET") {
+
+      if (
+        url.pathname === "/api/room" &&
+        request.method === "GET"
+      ) {
         return await getRoom(request, env);
       }
-      if (request.method !== "POST") return json({ error: "Endpoint tidak ditemukan." }, 404);
 
-      const body = await request.json();
-      if (url.pathname === "/api/create") return await createRoom(env, body);
-      if (url.pathname === "/api/join") return await joinRoom(env, body);
-      if (url.pathname === "/api/talk") return await talk(env, body);
-      if (url.pathname === "/api/accuse") return await accuse(env, body);
+      if (request.method !== "POST") {
+        return json({ error: "Endpoint tidak ditemukan." }, 404);
+      }
+
+      let body;
+
+      try {
+        body = await request.json();
+      } catch {
+        return json({ error: "Body request bukan JSON yang valid." }, 400);
+      }
+
+      if (url.pathname === "/api/create") {
+        return await createRoom(env, body);
+      }
+
+      if (url.pathname === "/api/join") {
+        return await joinRoom(env, body);
+      }
+
+      if (url.pathname === "/api/talk") {
+        return await talk(env, body);
+      }
+
+      if (url.pathname === "/api/accuse") {
+        return await accuse(env, body);
+      }
+
       return json({ error: "Endpoint tidak ditemukan." }, 404);
     } catch (error) {
-      console.error("Worker error:", error);
-      return json({ error: "Terjadi kesalahan pada server. Coba lagi." }, 500);
+      console.error("WORKER ERROR:", error);
+
+      return json({
+        error: "Terjadi kesalahan pada server. Coba lagi."
+      }, 500);
     }
   }
 };
